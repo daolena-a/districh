@@ -1,9 +1,35 @@
 package org.distrishe.command.register;
 
 import org.distrishe.command.Command;
+import org.distrishe.command.CommandRegistry;
 import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+
+@Component
 public class RegisterCommand implements Command {
+    @Autowired
+    private CommandRegistry registry;
+
+    public RegisterCommand() {
+
+    }
+
+    @PostConstruct
+    public void register(){
+        getRegistry().put(getClassifier(),this);
+    }
+
+    public CommandRegistry getRegistry() {
+        return registry;
+    }
+
+    public void setRegistry(CommandRegistry registry) {
+        this.registry = registry;
+    }
+
     @Override
     public String getClassifier() {
         return "registerCommand";

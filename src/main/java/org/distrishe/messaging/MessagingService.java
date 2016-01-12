@@ -16,7 +16,7 @@ public class MessagingService {
     private void init() {
         try{
             BrokerService broker = new BrokerService();
-            broker.addConnector("tcp://localhost:61616");
+            broker.addConnector("tcp://dev.backend:61616");
             broker.start();
         }catch(Exception e){
             e.printStackTrace();
