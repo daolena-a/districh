@@ -46,6 +46,9 @@ public class RegisterCommand implements Command {
             Object o = json.get("command");
             if(o instanceof String){
                 if("register".equals((String)o)){
+
+                    String serverName = json.get("serverName");
+
                     return true;
                 }
             }
