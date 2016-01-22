@@ -26,12 +26,18 @@ public class DistrischScheduler {
 
         //Get schedular
         scheduler = schedulerFactory.getScheduler();
+        //Start schedular
+        scheduler.start();
     }
 
     public void schedule(Class jobClass, String job, String group, String cronExpression, Map<String,String> params,ServerRegistered serverRegistered) throws Exception {
+        System.out.println("job"+job);
+        System.out.println("cron"+cronExpression);
         //Create JobDetail object specifying which Job you want to execute
         JobDataMap datas = new JobDataMap(params);
         datas.put("server",serverRegistered);
+        datas.put("jobType",serverRegistered.getJob(job));
+
         JobDetail jobDetail = newJob(jobClass).withIdentity(job, group).setJobData(datas).build();
 
         //Associate Trigger to the Job
@@ -45,7 +51,6 @@ public class DistrischScheduler {
         //Pass JobDetail and trigger dependencies to schedular
         scheduler.scheduleJob(jobDetail, trigger);
 
-        //Start schedular
-        scheduler.start();
+
     }
 }

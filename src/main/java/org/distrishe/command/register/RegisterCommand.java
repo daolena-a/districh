@@ -68,18 +68,12 @@ public class RegisterCommand implements Command {
 
     @Override
     public Boolean process(JSONObject json) {
-        return null;
-    }
-
-    @Override
-    public boolean hasToProcess(JSONObject json) {
         if (json.containsKey("classifier") && json.get("classifier") != null) {
             Object o = json.get("classifier");
             if (o instanceof String) {
                 if ("registerCommand".equals((String) o)) {
                     String serverName = (String) json.get("serverName");
                     ServerRegistered newServer = new ServerRegistered(serverName);
-
                     newServer.setQueueName(serverName + "_queue");
                     List<JSONObject> jobs = (List<JSONObject>) json.get("jobsType");
                     for (JSONObject jsonObject : jobs) {
@@ -89,18 +83,19 @@ public class RegisterCommand implements Command {
                         List<JSONObject> params = (List<JSONObject>) jsonObject.get("params");
                         Map<String,String> paramsMap = new HashMap<>();
                         params.forEach((param) -> {
-                          paramsMap.put((String)param.get("key"),(String)param.get("value"));
+                            paramsMap.put((String)param.get("key"),(String)param.get("value"));
                         });
                         JobType jobType = new JobType();
                         jobType.setCron(cronExpression);
                         jobType.setName(name);
                         jobType.setParameters(paramsMap);
+
                         newServer.addJob(jobType);
                     }
                     serverRegistry.addServer(newServer);
                     newServer.getJobs().forEach(jobType -> {
                         try{
-                            scheduler.schedule(DistrischJob.class,jobType.getName(),"",jobType.getCron(),jobType.getParameters(),newServer);
+                            scheduler.schedule(DistrischJob.class,jobType.getName(),"districh",jobType.getCron(),jobType.getParameters(),newServer);
                         }catch(Exception e){
                             e.printStackTrace();
                         }
@@ -110,5 +105,10 @@ public class RegisterCommand implements Command {
             }
         }
         return false;
+    }
+
+    @Override
+    public boolean hasToProcess(JSONObject json) {
+       return true;
     }
 }

@@ -19,16 +19,22 @@ public class DistrischJob implements Job {
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+        System.out.println("triggered");
         JobDataMap dataMap = jobExecutionContext.getMergedJobDataMap();
         ServerRegistered serverRegistered = (ServerRegistered) dataMap.get("server");
-        JobType job = (JobType) dataMap.get("server");
+        JobType job = (JobType) dataMap.get("jobType");
         try {
-
-
             // Create a messages
             JSONObject json = new JSONObject();
             json.put("classifier","startJob");
             json.put("jobType",job.getName());
+            JSONObject paramO = new JSONObject();
+            for(String key : dataMap.keySet()){
+                if(dataMap.get(key) instanceof String){
+                    paramO.put(key,dataMap.get(key).toString());
+                }
+            }
+            json.put("parameters",paramO);
 
             // Tell the producer to send the message
             MessageSender service = new MessageSender();

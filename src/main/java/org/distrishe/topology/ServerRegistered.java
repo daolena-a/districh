@@ -35,4 +35,8 @@ public class ServerRegistered {
     public Collection<JobType> getJobs(){
         return jobs.values();
     }
+
+    public JobType getJob(String name){
+        return jobs.get(name);
+    }
 }
