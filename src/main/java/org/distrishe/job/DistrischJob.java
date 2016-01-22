@@ -22,6 +22,10 @@ public class DistrischJob implements Job {
         System.out.println("triggered");
         JobDataMap dataMap = jobExecutionContext.getMergedJobDataMap();
         ServerRegistered serverRegistered = (ServerRegistered) dataMap.get("server");
+        if(serverRegistered.getLastSeen() > 0 && System.currentTimeMillis() - serverRegistered.getLastSeen() > 60000 ){
+            //log error
+            return;
+        }
         JobType job = (JobType) dataMap.get("jobType");
         try {
             // Create a messages

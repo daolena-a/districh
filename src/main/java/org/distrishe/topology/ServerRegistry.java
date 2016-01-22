@@ -16,4 +16,8 @@ public class ServerRegistry {
         servers.put(server.getName(),server);
     }
 
+    public ServerRegistered get(String serverName){
+        return servers.get(serverName);
+    }
+
 }
