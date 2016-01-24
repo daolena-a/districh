@@ -6,6 +6,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import javax.jms.*;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -13,6 +17,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class SampleJob {
 
+
+    ScheduledExecutorService scheduledExecutorService =
+            Executors.newScheduledThreadPool(5);
 
     /**
      * Created by adaolena on 12/01/16.
@@ -72,6 +79,7 @@ public class SampleJob {
 
     private Connection connection;
     MessageConsumer consumer;
+    LifeThread lifeThread;
 
 
     public void init() {
@@ -85,6 +93,9 @@ public class SampleJob {
             consumer = session.createConsumer(destination);
             new Thread(new ListenerThread()).start();
 
+            lifeThread = new LifeThread();
+            scheduledExecutorService.scheduleAtFixedRate(lifeThread,0, 30, TimeUnit.SECONDS);
+            new Thread(lifeThread).start();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -125,13 +136,6 @@ public class SampleJob {
         public void run() {
             while (run.get()) {
                 try {
-                    // Create a ConnectionFactory
-                    ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://dev.backend:61616");
-
-                    // Create a Connection
-                    Connection connection = connectionFactory.createConnection();
-                    connection.start();
-
                     // Create a Session
                     Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
@@ -151,7 +155,7 @@ public class SampleJob {
                     TextMessage message = session.createTextMessage(text);
 
                     // Tell the producer to send the message
-                    System.out.println("Sent message: " + message.hashCode() + " : " + Thread.currentThread().getName());
+                    System.out.println("Sent life: " + System.currentTimeMillis());
                     producer.send(message);
 
                     // Clean up
