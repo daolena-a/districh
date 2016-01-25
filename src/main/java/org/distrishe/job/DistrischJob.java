@@ -19,6 +19,7 @@ public class DistrischJob implements Job {
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+
         System.out.println("triggered");
         JobDataMap dataMap = jobExecutionContext.getMergedJobDataMap();
         ServerRegistered serverRegistered = (ServerRegistered) dataMap.get("server");
@@ -27,6 +28,7 @@ public class DistrischJob implements Job {
             return;
         }
         JobType job = (JobType) dataMap.get("jobType");
+        RunningJobRegister.putRunningJob(job,serverRegistered);
         try {
             // Create a messages
             JSONObject json = new JSONObject();

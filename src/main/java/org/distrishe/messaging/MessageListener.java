@@ -74,6 +74,9 @@ public class MessageListener {
                         if(command.hasToProcess(root)){
                             command.process(root);
                         }
+                        if(command == null){
+                            System.out.println("command not found");
+                        }
 
                     }
                 } catch (Exception e) {

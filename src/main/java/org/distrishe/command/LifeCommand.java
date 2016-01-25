@@ -24,12 +24,12 @@ public class LifeCommand  implements Command {
 
     @Override
     public String getClassifier() {
-        return "lifeCheck";
+        return "lifeCommand";
     }
 
     @Override
     public Boolean process(JSONObject v) {
-        long time = Long.valueOf((String)v.get("timestamp"));
+        long time = Long.valueOf((String)v.get("time"));
         String serverName = (String) v.get("serverName");
         ServerRegistered server = serverRegistry.get(serverName);
         long currentTime = System.currentTimeMillis();
