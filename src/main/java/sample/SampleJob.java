@@ -94,7 +94,7 @@ public class SampleJob {
             new Thread(new ListenerThread()).start();
 
             lifeThread = new LifeThread();
-            scheduledExecutorService.scheduleAtFixedRate(lifeThread,0, 30, TimeUnit.SECONDS);
+            scheduledExecutorService.scheduleAtFixedRate(lifeThread, 0, 30, TimeUnit.SECONDS);
             new Thread(lifeThread).start();
         } catch (Exception e) {
             e.printStackTrace();
@@ -115,8 +115,23 @@ public class SampleJob {
                         System.out.println("received" + message.toString());
                         TextMessage registerCommand = (TextMessage) message;
                         JSONObject root = (JSONObject) new JSONParser().parse(registerCommand.getText());
-
+                        String jobId = (String) root.get("jobId");
                         System.out.println(root.toString());
+                        // Create a Session
+                        Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+                        Destination destination = session.createQueue("distrische.command");
+                        MessageProducer producer = session.createProducer(destination);
+                        producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+
+                        String text = "{\n" +
+                                "\"classifier\":\"jobEndNotifierCommand\",\n" +
+                                "\"jobId\":\"" + jobId + "\"," +
+
+                                "}\n";
+                        TextMessage send = session.createTextMessage(text);
+
+                        producer.send(send);
+                        session.close();
 
 
                     }
@@ -128,43 +143,40 @@ public class SampleJob {
     }
 
 
-
     private class LifeThread implements Runnable {
-        AtomicBoolean run = new AtomicBoolean(true);
 
         @Override
         public void run() {
-            while (run.get()) {
-                try {
-                    // Create a Session
-                    Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+            try {
+                // Create a Session
+                Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
-                    // Create the destination (Topic or Queue)
-                    Destination destination = session.createQueue("distrische.command");
+                // Create the destination (Topic or Queue)
+                Destination destination = session.createQueue("distrische.command");
 
-                    // Create a MessageProducer from the Session to the Topic or Queue
-                    MessageProducer producer = session.createProducer(destination);
-                    producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
+                // Create a MessageProducer from the Session to the Topic or Queue
+                MessageProducer producer = session.createProducer(destination);
+                producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
-                    // Create a messages
-                    String text = "{\n" +
-                            "\"classifier\":\"lifeCommand\",\n" +
-                            "\"serverName\":\"local\"," +
-                            "\"time\":\""+System.currentTimeMillis()+"\"\n" +
-                            "}\n";
-                    TextMessage message = session.createTextMessage(text);
+                // Create a messages
+                String text = "{\n" +
+                        "\"classifier\":\"lifeCommand\",\n" +
+                        "\"serverName\":\"local\"," +
+                        "\"time\":\"" + System.currentTimeMillis() + "\"\n" +
+                        "}\n";
+                TextMessage message = session.createTextMessage(text);
 
-                    // Tell the producer to send the message
-                    System.out.println("Sent life: " + System.currentTimeMillis());
-                    producer.send(message);
+                // Tell the producer to send the message
+                System.out.println("Sent life: " + System.currentTimeMillis());
+                producer.send(message);
 
-                    // Clean up
-                    session.close();
-                } catch (Exception e) {
-                    System.out.println("Caught: " + e);
-                    e.printStackTrace();
-                }
+                // Clean up
+                session.close();
+            } catch (Exception e) {
+                System.out.println("Caught: " + e);
+                e.printStackTrace();
             }
+
         }
     }
 }
