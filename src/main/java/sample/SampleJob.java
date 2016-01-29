@@ -160,7 +160,6 @@ public class SampleJob {
 
                     // Clean up
                     session.close();
-                    connection.close();
                 } catch (Exception e) {
                     System.out.println("Caught: " + e);
                     e.printStackTrace();

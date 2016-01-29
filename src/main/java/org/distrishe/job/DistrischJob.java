@@ -28,12 +28,13 @@ public class DistrischJob implements Job {
             return;
         }
         JobType job = (JobType) dataMap.get("jobType");
-        RunningJobRegister.putRunningJob(job,serverRegistered);
+        RunningJob runningJob = RunningJobRegister.putRunningJob(job, serverRegistered);
         try {
             // Create a messages
             JSONObject json = new JSONObject();
             json.put("classifier","startJob");
             json.put("jobType",job.getName());
+            json.put("jobId",runningJob.getId().toString());
             JSONObject paramO = new JSONObject();
             for(String key : dataMap.keySet()){
                 if(dataMap.get(key) instanceof String){
