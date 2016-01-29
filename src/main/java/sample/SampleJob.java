@@ -30,7 +30,7 @@ public class SampleJob {
         m.init();
         try {
             // Create a ConnectionFactory
-            ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://dev.backend:61616");
+            ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 
             // Create a Connection
             Connection connection = connectionFactory.createConnection();
@@ -84,7 +84,7 @@ public class SampleJob {
 
     public void init() {
         try {
-            ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://dev.backend:61616");
+            ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
             Destination destination = new ActiveMQQueue("local_queue");
             connection = connectionFactory.createConnection();
 

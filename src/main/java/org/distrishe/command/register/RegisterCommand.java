@@ -12,9 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RegisterCommand implements Command {
@@ -91,6 +93,9 @@ public class RegisterCommand implements Command {
                         jobType.setCron(cronExpression);
                         jobType.setName(name);
                         jobType.setParameters(paramsMap);
+                        jobType.setServerRegisteredMap(new ConcurrentHashMap<>());
+                        jobType.setServerRegistereds(new ArrayList<>());
+                        jobType.getServerRegistereds().add(newServer);
 
                         newServer.addJob(jobType);
                     }

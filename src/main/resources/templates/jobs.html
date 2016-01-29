@@ -8,12 +8,12 @@
 <table>
     <tr>
         <th>Name</th>
-        <th>Name</th>
+        <th>Server</th>
 
     </tr>
     <tr th:each="s : ${jobs}">
         <td th:text="${s.name}">unknown</td>
-        <td th:text="${s.serverRegisteredMap.values}">unknown</td>
+        <td><div th:each="server : ${s.serverRegistereds}"><p th:text="${server.name}"></p></div></td>
 
     </tr>
 </table>

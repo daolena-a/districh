@@ -29,7 +29,7 @@ public class MessageSender {
     private void init() throws Exception {
 
         // Create a ConnectionFactory
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://dev.backend:61616");
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
 
         // Create a Connection
         connection = connectionFactory.createConnection();
