@@ -6,6 +6,8 @@ import org.distrishe.command.Command;
 import org.distrishe.command.CommandRegistry;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @Service
 public class MessageListener {
+
+    public static Logger LOGGER = LoggerFactory.getLogger(MessageListener.class);
+
     @Autowired
     private CommandRegistry commandRegistry;
 
@@ -75,12 +80,12 @@ public class MessageListener {
                             command.process(root);
                         }
                         if(command == null){
-                            System.out.println("command not found");
+                            LOGGER.error("Command not found for classifier {}", commandClassifier);
                         }
 
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LOGGER.error("Error in message listener thread", e);
                 }
             }
         }

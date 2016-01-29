@@ -2,6 +2,7 @@ package org.distrishe.topology;
 
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,6 +19,10 @@ public class ServerRegistry {
 
     public ServerRegistered get(String serverName){
         return servers.get(serverName);
+    }
+
+    public Collection<ServerRegistered> getAll(){
+        return servers.values();
     }
 
 }

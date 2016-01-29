@@ -1,7 +1,8 @@
 package org.distrishe.messaging;
 
 import org.apache.activemq.broker.BrokerService;
-import org.springframework.context.annotation.Bean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -9,17 +10,19 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class MessagingService {
+    public static Logger LOGGER = LoggerFactory.getLogger(MessageListener.class);
+
     public MessagingService() {
         init();
     }
 
     private void init() {
-        try{
+        try {
             BrokerService broker = new BrokerService();
             broker.addConnector("tcp://dev.backend:61616");
             broker.start();
-        }catch(Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOGGER.error("Error in starting activemq broker", e);
         }
 
     }

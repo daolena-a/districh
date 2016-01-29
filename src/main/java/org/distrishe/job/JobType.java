@@ -1,19 +1,18 @@
 package org.distrishe.job;
 
 import org.distrishe.topology.ServerRegistered;
-import org.eclipse.jetty.server.Server;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * Created by adaolena on 13/01/16.
  */
 public class JobType {
-    Map<String,ServerRegistered> serverRegisteredMap = new HashMap<>();
+
+    Map<String, ServerRegistered> serverRegisteredMap = new HashMap<>();
     String cron;
-    Map<String,String> parameters = new HashMap<>();
+    Map<String, String> parameters = new HashMap<>();
     private String name;
 
     public Map<String, ServerRegistered> getServerRegisteredMap() {

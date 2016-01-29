@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 public class Main {
     public static void main(String[] args) {
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Main.class);
-        new WebConfig();
+
         ctx.registerShutdownHook();
     }
 }

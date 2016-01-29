@@ -1,0 +1,17 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-3.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${title}">Title</title>
+</head>
+<body>
+<table>
+    <tr>
+        <th>Name</th>
+    </tr>
+    <tr th:each="s : ${servers}">
+        <td th:text="${s.name}">unknown</td>
+    </tr>
+</table>
+</body>
+</html>

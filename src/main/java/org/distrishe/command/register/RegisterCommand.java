@@ -28,6 +28,8 @@ public class RegisterCommand implements Command {
     @Autowired
     private DistrischScheduler scheduler;
 
+
+
     public ServerRegistry getServerRegistry() {
         return serverRegistry;
     }

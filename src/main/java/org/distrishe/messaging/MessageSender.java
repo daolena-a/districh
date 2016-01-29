@@ -1,6 +1,8 @@
 package org.distrishe.messaging;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.jms.*;
@@ -10,6 +12,9 @@ import javax.jms.*;
  */
 @Service
 public class MessageSender {
+
+    public static Logger LOGGER = LoggerFactory.getLogger(MessageListener.class);
+
     private Session session = null;
     private Connection connection = null;
 
@@ -17,7 +22,7 @@ public class MessageSender {
         try {
             init();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("",e);
         }
     }
 
@@ -47,9 +52,8 @@ public class MessageSender {
 
         TextMessage message = session.createTextMessage(data);
 
-        // Tell the producer to send the message
-        System.out.println("Sent message: " + message.hashCode() + " : " + Thread.currentThread().getName());
         producer.send(message);
+        LOGGER.info("Message sent {}", data);
 
         // Clean up
         session.close();
@@ -57,6 +61,11 @@ public class MessageSender {
 
     }
 
+    /**
+     * Create queue
+     * @param queueName
+     * @throws Exception
+     */
     public void createQueue(String queueName) throws Exception {
         session.createQueue(queueName);
     }
