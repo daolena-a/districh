@@ -21,4 +21,8 @@ public class JobTypeRegistry {
         return registry.values();
     }
 
+    public JobType getByName(String name){
+        return registry.get(name);
+    }
+
 }

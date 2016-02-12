@@ -5,6 +5,7 @@ import org.distrishe.command.CommandRegistry;
 import org.distrishe.job.DistrischJob;
 import org.distrishe.job.DistrischScheduler;
 import org.distrishe.job.JobType;
+import org.distrishe.job.JobTypeRegistry;
 import org.distrishe.topology.ServerRegistered;
 import org.distrishe.topology.ServerRegistry;
 import org.json.simple.JSONObject;
@@ -12,14 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class RegisterCommand implements Command {
+
+
     @Autowired
     private CommandRegistry registry;
 
@@ -30,7 +31,16 @@ public class RegisterCommand implements Command {
     @Autowired
     private DistrischScheduler scheduler;
 
+    @Autowired
+    private JobTypeRegistry jobTypeRegistry;
 
+    public JobTypeRegistry getJobTypeRegistry() {
+        return jobTypeRegistry;
+    }
+
+    public void setJobTypeRegistry(JobTypeRegistry jobTypeRegistry) {
+        this.jobTypeRegistry = jobTypeRegistry;
+    }
 
     public ServerRegistry getServerRegistry() {
         return serverRegistry;
@@ -77,33 +87,32 @@ public class RegisterCommand implements Command {
             if (o instanceof String) {
                 if ("registerCommand".equals((String) o)) {
                     String serverName = (String) json.get("serverName");
-                    ServerRegistered newServer = new ServerRegistered(serverName);
+                    final ServerRegistered newServer = serverRegistry.getOrCreateServer(serverName);
                     newServer.setQueueName(serverName + "_queue");
                     List<JSONObject> jobs = (List<JSONObject>) json.get("jobsType");
                     for (JSONObject jsonObject : jobs) {
-                        String cronExpression = (String)jsonObject.get("cronExpression");
-                        String name = (String)jsonObject.get("name");
-
-                        List<JSONObject> params = (List<JSONObject>) jsonObject.get("params");
-                        Map<String,String> paramsMap = new HashMap<>();
-                        params.forEach((param) -> {
-                            paramsMap.put((String)param.get("key"),(String)param.get("value"));
-                        });
-                        JobType jobType = new JobType();
+                        String cronExpression = (String) jsonObject.get("cronExpression");
+                        final JobType jobType;
+                        String name = (String) jsonObject.get("name");
+                        if (jobTypeRegistry.getByName(name) != null) {
+                            jobType = jobTypeRegistry.getByName(name);
+                        } else {
+                            jobType = new JobType();
+                        }
+                        newServer.addJob(jobType);
                         jobType.setCron(cronExpression);
                         jobType.setName(name);
-                        jobType.setParameters(paramsMap);
-                        jobType.setServerRegisteredMap(new ConcurrentHashMap<>());
-                        jobType.setServerRegistereds(new ArrayList<>());
                         jobType.getServerRegistereds().add(newServer);
-
-                        newServer.addJob(jobType);
+                        List<JSONObject> params = (List<JSONObject>) jsonObject.get("params");
+                        Map<String, String> paramsMap = new HashMap<>();
+                        params.forEach((param) -> {
+                            newServer.addConf(name, (String) param.get("key"), (String) param.get("value"));
+                        });
                     }
-                    serverRegistry.addServer(newServer);
                     newServer.getJobs().forEach(jobType -> {
-                        try{
-                            scheduler.schedule(DistrischJob.class,jobType.getName(),"districh",jobType.getCron(),jobType.getParameters(),newServer);
-                        }catch(Exception e){
+                        try {
+                            scheduler.schedule(DistrischJob.class, jobType.getName(), "districh", jobType.getCron());
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
                     });
@@ -116,6 +125,6 @@ public class RegisterCommand implements Command {
 
     @Override
     public boolean hasToProcess(JSONObject json) {
-       return true;
+        return true;
     }
 }

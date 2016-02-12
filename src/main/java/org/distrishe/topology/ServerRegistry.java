@@ -25,4 +25,15 @@ public class ServerRegistry {
         return servers.values();
     }
 
+    public ServerRegistered getOrCreateServer(String serverName){
+        ServerRegistered serverRegistered;
+        if (servers.get(serverName) != null) {
+            serverRegistered = servers.get(serverName);
+        } else {
+            serverRegistered = new ServerRegistered(serverName);
+            addServer(serverRegistered);
+        }
+        return serverRegistered;
+
+    }
 }

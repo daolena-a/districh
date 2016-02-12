@@ -3,10 +3,12 @@ package org.distrishe.job;
 import org.distrishe.topology.ServerRegistered;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
+import java.util.Comparator;
 import java.util.Map;
 
 import static org.quartz.JobBuilder.newJob;
@@ -19,6 +21,10 @@ import static org.quartz.TriggerBuilder.newTrigger;
 public class DistrischScheduler {
     private SchedulerFactory schedulerFactory;
     private org.quartz.Scheduler scheduler;
+
+    @Autowired
+    private JobTypeRegistry jobTypeRegistry;
+
     @PostConstruct
     public void init() throws Exception{
         //Create instance of factory
@@ -30,13 +36,23 @@ public class DistrischScheduler {
         scheduler.start();
     }
 
-    public void schedule(Class jobClass, String job, String group, String cronExpression, Map<String,String> params,ServerRegistered serverRegistered) throws Exception {
+    public void schedule(Class jobClass, String job, String group, String cronExpression) throws Exception {
         System.out.println("job"+job);
         System.out.println("cron"+cronExpression);
         //Create JobDetail object specifying which Job you want to execute
-        JobDataMap datas = new JobDataMap(params);
-        datas.put("server",serverRegistered);
-        datas.put("jobType",serverRegistered.getJob(job));
+        JobType jobType = jobTypeRegistry.getByName(job);
+        ServerRegistered serverRegisteredToRun = null;
+        int min = Integer.MAX_VALUE;
+        for (ServerRegistered serverRegistered : jobType.getServerRegistereds()) {
+            int running = RunningJobRegister.getNumberOfRunningJob(serverRegistered);
+            if(running < min) {
+                min = running;
+                serverRegisteredToRun = serverRegistered;
+            }
+        }
+        JobDataMap datas = new JobDataMap(serverRegisteredToRun.getParam(job));
+        datas.put("server",serverRegisteredToRun);
+        datas.put("jobType",serverRegisteredToRun.getJob(job));
 
         JobDetail jobDetail = newJob(jobClass).withIdentity(job, group).setJobData(datas).build();
 

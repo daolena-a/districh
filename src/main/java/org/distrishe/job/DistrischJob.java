@@ -24,6 +24,7 @@ public class DistrischJob implements Job {
         ServerRegistered serverRegistered = (ServerRegistered) dataMap.get("server");
         if (serverRegistered.getLastSeen() > 0 && System.currentTimeMillis() - serverRegistered.getLastSeen() > 60000) {
             //log error
+            LOGGER.error("long time no see {}", serverRegistered.getName());
             return;
         }
         JobType job = (JobType) dataMap.get("jobType");

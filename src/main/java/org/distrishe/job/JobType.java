@@ -14,7 +14,6 @@ public class JobType {
 
     Map<String, ServerRegistered> serverRegisteredMap = new HashMap<>();
     String cron;
-    Map<String, String> parameters = new HashMap<>();
     List<ServerRegistered> serverRegistereds = new ArrayList<>();
 
     private String name;
@@ -35,13 +34,6 @@ public class JobType {
         this.cron = cron;
     }
 
-    public Map<String, String> getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(Map<String, String> parameters) {
-        this.parameters = parameters;
-    }
 
     public String getName() {
         return name;
