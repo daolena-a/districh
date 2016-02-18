@@ -43,7 +43,7 @@ public class RunningJobRegister {
 
     public static void removeJob(String uuid){
         UUID id = UUID.fromString(uuid);
-        RunningJob runningJob = registry.get(uuid);
+        RunningJob runningJob = registry.get(id);
         ServerRegistered serverRegistered = runningJob.getRegistered();
         registry.remove(id);
         AtomicInteger numberOfRunningJobs = NUMBER_OF_JOB_BY_SERVER.get(serverRegistered.getName());

@@ -95,13 +95,17 @@ public class RegisterCommand implements Command {
                         final JobType jobType;
                         String name = (String) jsonObject.get("name");
                         if (jobTypeRegistry.getByName(name) != null) {
+                            System.out.println("update job");
                             jobType = jobTypeRegistry.getByName(name);
                         } else {
                             jobType = new JobType();
+                            jobType.setCron(cronExpression);
+                            jobType.setName(name);
+                            jobTypeRegistry.put(name, jobType);
+                            System.out.println("new job");
                         }
+
                         newServer.addJob(jobType);
-                        jobType.setCron(cronExpression);
-                        jobType.setName(name);
                         jobType.getServerRegistereds().add(newServer);
                         List<JSONObject> params = (List<JSONObject>) jsonObject.get("params");
                         Map<String, String> paramsMap = new HashMap<>();

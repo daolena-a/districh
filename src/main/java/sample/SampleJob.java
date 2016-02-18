@@ -136,6 +136,7 @@ public class SampleJob {
 
                     }
                 } catch (Exception e) {
+                    run.set(false);
                     e.printStackTrace();
                 }
             }

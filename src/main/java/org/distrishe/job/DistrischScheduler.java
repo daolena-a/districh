@@ -25,6 +25,14 @@ public class DistrischScheduler {
     @Autowired
     private JobTypeRegistry jobTypeRegistry;
 
+    public JobTypeRegistry getJobTypeRegistry() {
+        return jobTypeRegistry;
+    }
+
+    public void setJobTypeRegistry(JobTypeRegistry jobTypeRegistry) {
+        this.jobTypeRegistry = jobTypeRegistry;
+    }
+
     @PostConstruct
     public void init() throws Exception{
         //Create instance of factory
@@ -43,29 +51,34 @@ public class DistrischScheduler {
         JobType jobType = jobTypeRegistry.getByName(job);
         ServerRegistered serverRegisteredToRun = null;
         int min = Integer.MAX_VALUE;
-        for (ServerRegistered serverRegistered : jobType.getServerRegistereds()) {
-            int running = RunningJobRegister.getNumberOfRunningJob(serverRegistered);
-            if(running < min) {
-                min = running;
-                serverRegisteredToRun = serverRegistered;
+        if(jobType.getServerRegistereds() != null){
+            for (ServerRegistered serverRegistered : jobType.getServerRegistereds()) {
+                int running = RunningJobRegister.getNumberOfRunningJob(serverRegistered);
+                if(running < min) {
+                    min = running;
+                    serverRegisteredToRun = serverRegistered;
+                }
             }
         }
-        JobDataMap datas = new JobDataMap(serverRegisteredToRun.getParam(job));
-        datas.put("server",serverRegisteredToRun);
-        datas.put("jobType",serverRegisteredToRun.getJob(job));
+        if(serverRegisteredToRun != null){
+            JobDataMap datas = new JobDataMap(serverRegisteredToRun.getParam(job));
+            datas.put("server",serverRegisteredToRun);
+            datas.put("jobType",serverRegisteredToRun.getJob(job));
 
-        JobDetail jobDetail = newJob(jobClass).withIdentity(job, group).setJobData(datas).build();
+            JobDetail jobDetail = newJob(jobClass).withIdentity(job, group).setJobData(datas).build();
 
-        //Associate Trigger to the Job
-        //CronTrigger trigger=new CronTriggerImpl("cronTrigger","myJob1","0 0/1 * * * ?");
-        Trigger trigger = newTrigger()
-                .withIdentity("trigger1", "group1")
-                .startNow()
-                .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression))
-                .build();
+            //Associate Trigger to the Job
+            //CronTrigger trigger=new CronTriggerImpl("cronTrigger","myJob1","0 0/1 * * * ?");
+            Trigger trigger = newTrigger()
+                    .withIdentity("trigger1", "group1")
+                    .startNow()
+                    .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression))
+                    .build();
 
-        //Pass JobDetail and trigger dependencies to schedular
-        scheduler.scheduleJob(jobDetail, trigger);
+            //Pass JobDetail and trigger dependencies to schedular
+            scheduler.scheduleJob(jobDetail, trigger);
+        }
+
 
 
     }
