@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by adaolena on 13/01/16.
@@ -14,6 +15,7 @@ public class ServerRegistered {
     private String queueName;
     Map<String, JobType> jobs = new HashMap<>();
     Map<String, Map<String,String>> jobsConfs = new ConcurrentHashMap<>();
+    private AtomicInteger numberOfJobRun = new AtomicInteger(0);
 
     private long lastSeen = 0;
     private String name;
@@ -63,7 +65,15 @@ public class ServerRegistered {
         }
     }
 
+    public Map<String,String> getConf(String jobName){
+        return jobsConfs.get(jobName);
+    }
+
     public Map<String,String> getParam(String jobTypeName){
         return jobsConfs.get(jobTypeName);
+    }
+
+    public AtomicInteger getNumberOfJobRunned(){
+        return numberOfJobRun;
     }
 }

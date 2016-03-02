@@ -90,6 +90,7 @@ public class RegisterCommand implements Command {
                     final ServerRegistered newServer = serverRegistry.getOrCreateServer(serverName);
                     newServer.setQueueName(serverName + "_queue");
                     List<JSONObject> jobs = (List<JSONObject>) json.get("jobsType");
+                    boolean newJob = true;
                     for (JSONObject jsonObject : jobs) {
                         String cronExpression = (String) jsonObject.get("cronExpression");
                         final JobType jobType;
@@ -97,12 +98,14 @@ public class RegisterCommand implements Command {
                         if (jobTypeRegistry.getByName(name) != null) {
                             System.out.println("update job");
                             jobType = jobTypeRegistry.getByName(name);
+                            newJob = false;
                         } else {
                             jobType = new JobType();
                             jobType.setCron(cronExpression);
                             jobType.setName(name);
                             jobTypeRegistry.put(name, jobType);
                             System.out.println("new job");
+
                         }
 
                         newServer.addJob(jobType);
@@ -112,14 +115,16 @@ public class RegisterCommand implements Command {
                         params.forEach((param) -> {
                             newServer.addConf(name, (String) param.get("key"), (String) param.get("value"));
                         });
-                    }
-                    newServer.getJobs().forEach(jobType -> {
                         try {
-                            scheduler.schedule(DistrischJob.class, jobType.getName(), "districh", jobType.getCron());
+                            if(newJob){
+                                scheduler.schedule(DistrischJob.class, jobType.getName(), "districh", jobType.getCron());
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                    });
+
+                    }
+
                     return true;
                 }
             }

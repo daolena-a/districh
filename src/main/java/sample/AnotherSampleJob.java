@@ -6,16 +6,15 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import javax.jms.*;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Created by adaolena on 22/01/16.
+ * Created by adaolena on 18/02/16.
  */
-public class SampleJob {
+public class AnotherSampleJob {
 
 
     ScheduledExecutorService scheduledExecutorService =
@@ -26,7 +25,7 @@ public class SampleJob {
      */
     public static void main(String[] args) {
 
-        SampleJob m = new SampleJob();
+        AnotherSampleJob m = new AnotherSampleJob();
         m.init();
         try {
             // Create a ConnectionFactory
@@ -49,16 +48,16 @@ public class SampleJob {
             // Create a messages
             String text = "{\n" +
                     "\"classifier\":\"registerCommand\",\n" +
-                    "\"serverName\":\"remote\"," +
+                    "\"serverName\":\"local\"," +
                     "\"jobsType\":[{\n" +
                     "\"cronExpression\":\"0 0/1 * 1/1 * ? *\",\n" +
                     "\"name\":\"printHello\",\n" +
                     "\"params\":[{\n" +
                     "\"key\":\"param1\",\n" +
-                    "\"value\":\"pouet\",\n" +
+                    "\"value\":\"job2\",\n" +
                     "},{\n" +
                     "\"key\":\"param2\",\n" +
-                    "\"value\":\"taktak\"\n" +
+                    "\"value\":\"job2\"\n" +
                     "}]\n" +
                     "}]\n" +
                     "}\n";
@@ -72,7 +71,6 @@ public class SampleJob {
             session.close();
             connection.close();
         } catch (Exception e) {
-            System.out.println("Caught: " + e);
             e.printStackTrace();
         }
     }
@@ -85,7 +83,7 @@ public class SampleJob {
     public void init() {
         try {
             ConnectionFactory connectionFactory = new ActiveMQConnectionFactory("tcp://localhost:61616");
-            Destination destination = new ActiveMQQueue("remote_queue");
+            Destination destination = new ActiveMQQueue("local_queue");
             connection = connectionFactory.createConnection();
 
             connection.start();
@@ -116,7 +114,7 @@ public class SampleJob {
                         TextMessage registerCommand = (TextMessage) message;
                         JSONObject root = (JSONObject) new JSONParser().parse(registerCommand.getText());
                         String jobId = (String) root.get("jobId");
-                        System.out.println(root.toString());
+                        System.out.println(registerCommand.getText());
                         // Create a Session
                         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
                         Destination destination = session.createQueue("distrische.command");
@@ -162,7 +160,7 @@ public class SampleJob {
                 // Create a messages
                 String text = "{\n" +
                         "\"classifier\":\"lifeCommand\",\n" +
-                        "\"serverName\":\"remote\"," +
+                        "\"serverName\":\"local\"," +
                         "\"time\":\"" + System.currentTimeMillis() + "\"\n" +
                         "}\n";
                 TextMessage message = session.createTextMessage(text);
@@ -181,5 +179,3 @@ public class SampleJob {
         }
     }
 }
-
-

@@ -32,13 +32,19 @@ public class LifeCommand  implements Command {
         long time = Long.valueOf((String)v.get("time"));
         String serverName = (String) v.get("serverName");
         ServerRegistered server = serverRegistry.get(serverName);
-        long currentTime = System.currentTimeMillis();
-        if((currentTime - time) > 10000){
-            // platform is slow
-            logger.info("The scheduler seems to be slow...");
+        if(server != null){
+            long currentTime = System.currentTimeMillis();
+            if((currentTime - time) > 10000){
+                // platform is slow
+                logger.info("The scheduler seems to be slow...");
+            }
+            server.updateLastSeen(time);
+            return true;
+        } else{
+            logger.info("server not exists: "+serverName);
+            return true;
         }
-        server.updateLastSeen(time);
-        return true;
+
     }
 
     @Override

@@ -29,12 +29,14 @@ public class RunningJobRegister {
         if(NUMBER_OF_JOB_BY_SERVER.get(serverRegistered.getName()) == null){
             masterLock.lock();
             if(NUMBER_OF_JOB_BY_SERVER.get(serverRegistered.getName()) == null){
-                NUMBER_OF_JOB_BY_SERVER.put(serverRegistered.getName(),new AtomicInteger(0));
+                NUMBER_OF_JOB_BY_SERVER.put(serverRegistered.getName(),new AtomicInteger(1));
             }
+            serverRegistered.getNumberOfJobRunned().incrementAndGet();
             masterLock.unlock();
         }else{
             AtomicInteger numberOfRunningJobs = NUMBER_OF_JOB_BY_SERVER.get(serverRegistered.getName());
             numberOfRunningJobs.incrementAndGet();
+            serverRegistered.getNumberOfJobRunned().incrementAndGet();
         }
 
         return runningJob;

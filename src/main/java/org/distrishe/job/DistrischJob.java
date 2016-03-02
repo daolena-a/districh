@@ -10,6 +10,8 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 /**
  * Created by adaolena on 13/01/16.
  */
@@ -29,6 +31,41 @@ public class DistrischJob implements Job {
         }
         JobType job = (JobType) dataMap.get("jobType");
         LOGGER.info("job {}, has triggered", job.getName());
+        int min = Integer.MAX_VALUE;
+        /**
+         * Just a round robin test
+         */
+        if (job.getServerRegistereds() != null) {
+            for (ServerRegistered server : job.getServerRegistereds()) {
+                int running = RunningJobRegister.getNumberOfRunningJob(serverRegistered);
+                if (running < min) {
+                    LOGGER.info("chosing between "+server.getName()+running);
+
+
+                    min = running;
+                    serverRegistered = server;
+                }else{
+                    LOGGER.info("not chose "+server.getName()+running);
+
+                }
+            }
+        }
+        if(min == 0) {
+            min = Integer.MAX_VALUE;
+            for (ServerRegistered server : job.getServerRegistereds()) {
+                if(server.getNumberOfJobRunned().get() < min){
+                    LOGGER.info("chosing between "+server.getName()+server.getNumberOfJobRunned().get());
+
+                    serverRegistered = server;
+                    min = server.getNumberOfJobRunned().get();
+                }else{
+                    LOGGER.info("not chose "+server.getName()+server.getNumberOfJobRunned().get());
+
+                }
+            }
+        }
+
+        LOGGER.info("chose "+serverRegistered.getName());
         RunningJob runningJob = RunningJobRegister.putRunningJob(job, serverRegistered);
         try {
             // Create a messages
@@ -37,11 +74,11 @@ public class DistrischJob implements Job {
             json.put("jobType", job.getName());
             json.put("jobId", runningJob.getId().toString());
             JSONObject paramO = new JSONObject();
-            for (String key : dataMap.keySet()) {
-                if (dataMap.get(key) instanceof String) {
-                    paramO.put(key, dataMap.get(key).toString());
-                }
-            }
+            Map<String, String> param = serverRegistered.getConf(job.getName());
+            param.forEach((key, value) -> {
+                paramO.put(key, value);
+            });
+
             json.put("parameters", paramO);
 
             // Tell the producer to send the message
