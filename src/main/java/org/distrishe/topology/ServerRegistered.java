@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by adaolena on 13/01/16.
+ * A server registered in distrisch
  */
 public class ServerRegistered {
     private String queueName;

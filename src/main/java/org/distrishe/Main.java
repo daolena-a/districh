@@ -12,9 +12,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan({ "org.distrishe" })
 public class Main {
+    public static AnnotationConfigApplicationContext springContext;
     public static void main(String[] args) {
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(Main.class);
-
+        springContext = ctx;
         ctx.registerShutdownHook();
     }
 }

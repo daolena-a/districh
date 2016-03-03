@@ -12,9 +12,9 @@ import java.util.Map;
  */
 public class JobType {
 
-    Map<String, ServerRegistered> serverRegisteredMap = new HashMap<>();
-    String cron;
-    List<ServerRegistered> serverRegistereds = new ArrayList<>();
+    private Map<String, ServerRegistered> serverRegisteredMap = new HashMap<>();
+    private String cron;
+    private List<ServerRegistered> serverRegistereds = new ArrayList<>();
 
     private String name;
 

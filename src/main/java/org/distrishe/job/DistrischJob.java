@@ -1,5 +1,6 @@
 package org.distrishe.job;
 
+import org.distrishe.Main;
 import org.distrishe.messaging.MessageSender;
 import org.distrishe.topology.ServerRegistered;
 import org.json.simple.JSONObject;
@@ -9,6 +10,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.Map;
 
@@ -21,7 +23,8 @@ public class DistrischJob implements Job {
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
 
-
+        AnnotationConfigApplicationContext ctx = Main.springContext;
+        RunningJobRegister runningJobRegister = (RunningJobRegister)ctx.getBean(RunningJobRegister.class);
         JobDataMap dataMap = jobExecutionContext.getMergedJobDataMap();
         ServerRegistered serverRegistered = (ServerRegistered) dataMap.get("server");
         if (serverRegistered.getLastSeen() > 0 && System.currentTimeMillis() - serverRegistered.getLastSeen() > 60000) {
@@ -33,20 +36,18 @@ public class DistrischJob implements Job {
         LOGGER.info("job {}, has triggered", job.getName());
         int min = Integer.MAX_VALUE;
         /**
-         * Just a round robin test
+         * Just a round robin test,
+         * todo refactor
          */
         if (job.getServerRegistereds() != null) {
             for (ServerRegistered server : job.getServerRegistereds()) {
-                int running = RunningJobRegister.getNumberOfRunningJob(serverRegistered);
+                int running = runningJobRegister.getNumberOfRunningJob(serverRegistered);
                 if (running < min) {
                     LOGGER.info("chosing between "+server.getName()+running);
-
-
                     min = running;
                     serverRegistered = server;
                 }else{
                     LOGGER.info("not chose "+server.getName()+running);
-
                 }
             }
         }
@@ -55,18 +56,17 @@ public class DistrischJob implements Job {
             for (ServerRegistered server : job.getServerRegistereds()) {
                 if(server.getNumberOfJobRunned().get() < min){
                     LOGGER.info("chosing between "+server.getName()+server.getNumberOfJobRunned().get());
-
                     serverRegistered = server;
                     min = server.getNumberOfJobRunned().get();
                 }else{
                     LOGGER.info("not chose "+server.getName()+server.getNumberOfJobRunned().get());
-
                 }
             }
         }
-
         LOGGER.info("chose "+serverRegistered.getName());
-        RunningJob runningJob = RunningJobRegister.putRunningJob(job, serverRegistered);
+
+        RunningJob runningJob = runningJobRegister.putRunningJob(job,serverRegistered);
+        //RunningJob runningJob = RunningJobRegister.putRunningJob(job, serverRegistered);
         try {
             // Create a messages
             JSONObject json = new JSONObject();
@@ -78,13 +78,10 @@ public class DistrischJob implements Job {
             param.forEach((key, value) -> {
                 paramO.put(key, value);
             });
-
             json.put("parameters", paramO);
-
             // Tell the producer to send the message
             MessageSender service = new MessageSender();
             service.sendMessage(json.toJSONString(), serverRegistered.getQueueName());
-
         } catch (Exception e) {
             LOGGER.error("", e);
         }

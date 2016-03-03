@@ -3,13 +3,12 @@ package org.distrishe.job;
 import org.distrishe.topology.ServerRegistered;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-
-import java.util.Comparator;
-import java.util.Map;
 
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
@@ -19,9 +18,13 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 @Service
 public class DistrischScheduler {
+
+    public static Logger LOGGER = LoggerFactory.getLogger(DistrischJob.class);
     private SchedulerFactory schedulerFactory;
     private org.quartz.Scheduler scheduler;
 
+    @Autowired
+    private  RunningJobRegister runningJobRegister;
     @Autowired
     private JobTypeRegistry jobTypeRegistry;
 
@@ -33,37 +36,42 @@ public class DistrischScheduler {
         this.jobTypeRegistry = jobTypeRegistry;
     }
 
-    @PostConstruct
-    public void init() throws Exception{
-        //Create instance of factory
-        schedulerFactory = new StdSchedulerFactory();
+    public RunningJobRegister getRunningJobRegister() {
+        return runningJobRegister;
+    }
 
-        //Get schedular
+    public void setRunningJobRegister(RunningJobRegister runningJobRegister) {
+        this.runningJobRegister = runningJobRegister;
+    }
+
+    @PostConstruct
+    public void init() throws Exception {
+        schedulerFactory = new StdSchedulerFactory();
         scheduler = schedulerFactory.getScheduler();
-        //Start schedular
         scheduler.start();
     }
 
     public void schedule(Class jobClass, String job, String group, String cronExpression) throws Exception {
-        System.out.println("job"+job);
-        System.out.println("cron"+cronExpression);
+
+        LOGGER.info("scheduling job" + job);
+        LOGGER.info("cron" + cronExpression);
         //Create JobDetail object specifying which Job you want to execute
         JobType jobType = jobTypeRegistry.getByName(job);
         ServerRegistered serverRegisteredToRun = null;
         int min = Integer.MAX_VALUE;
-        if(jobType.getServerRegistereds() != null){
+        if (jobType.getServerRegistereds() != null) {
             for (ServerRegistered serverRegistered : jobType.getServerRegistereds()) {
-                int running = RunningJobRegister.getNumberOfRunningJob(serverRegistered);
-                if(running < min) {
+                int running = runningJobRegister.getNumberOfRunningJob(serverRegistered);
+                if (running < min) {
                     min = running;
                     serverRegisteredToRun = serverRegistered;
                 }
             }
         }
-        if(serverRegisteredToRun != null){
+        if (serverRegisteredToRun != null) {
             JobDataMap datas = new JobDataMap(serverRegisteredToRun.getParam(job));
-            datas.put("server",serverRegisteredToRun);
-            datas.put("jobType",serverRegisteredToRun.getJob(job));
+            datas.put("server", serverRegisteredToRun);
+            datas.put("jobType", serverRegisteredToRun.getJob(job));
 
             JobDetail jobDetail = newJob(jobClass).withIdentity(job, group).setJobData(datas).build();
 
@@ -75,10 +83,9 @@ public class DistrischScheduler {
                     .withSchedule(CronScheduleBuilder.cronSchedule(cronExpression))
                     .build();
 
-            //Pass JobDetail and trigger dependencies to schedular
+            //Pass JobDetail and trigger dependencies to scheduler
             scheduler.scheduleJob(jobDetail, trigger);
         }
-
 
 
     }

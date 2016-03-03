@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by adaolena on 18/01/16.
+ * A server registry.
  */
 @Service
 public class ServerRegistry {

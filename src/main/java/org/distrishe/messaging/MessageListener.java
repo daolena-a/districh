@@ -55,14 +55,15 @@ public class MessageListener {
     public void cleanup() {
         try {
             connection.close();
+            run.set(false);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
+    AtomicBoolean run = new AtomicBoolean(true);
     private class ListenerThread implements Runnable{
-        AtomicBoolean run = new AtomicBoolean(true);
         @Override
         public void run() {
             while(run.get()){

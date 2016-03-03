@@ -13,14 +13,23 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by adaolena on 25/01/16.
+ * Running job register
+ * TODO make it a spring service
  */
+@Service
 public class RunningJobRegister {
-    static private Map<UUID,RunningJob> registry = new ConcurrentHashMap<>();
+     private Map<UUID,RunningJob> registry = new ConcurrentHashMap<>();
 
-    private static Lock masterLock = new ReentrantLock();
-    private static Map<String, AtomicInteger> NUMBER_OF_JOB_BY_SERVER = new ConcurrentHashMap<>();
+    private  Lock masterLock = new ReentrantLock();
+    private  Map<String, AtomicInteger> NUMBER_OF_JOB_BY_SERVER = new ConcurrentHashMap<>();
 
-    public static RunningJob putRunningJob(JobType jobType, ServerRegistered serverRegistered){
+    /**
+     * Put a  job in the running map.
+     * @param jobType The job type
+     * @param serverRegistered The server which is running the job
+     * @return a RunningJob object.
+     */
+    public RunningJob putRunningJob(JobType jobType, ServerRegistered serverRegistered){
         RunningJob runningJob = new RunningJob();
         runningJob.setRegistered(serverRegistered);
         runningJob.setJob(jobType);
@@ -42,17 +51,26 @@ public class RunningJobRegister {
         return runningJob;
     }
 
-
-    public static void removeJob(String uuid){
+    /**
+     * Remove a job from the running state
+     * @param uuid the job id.
+     */
+    public void removeJob(String uuid){
         UUID id = UUID.fromString(uuid);
         RunningJob runningJob = registry.get(id);
+        runningJob.setEndDate(System.currentTimeMillis());
         ServerRegistered serverRegistered = runningJob.getRegistered();
         registry.remove(id);
         AtomicInteger numberOfRunningJobs = NUMBER_OF_JOB_BY_SERVER.get(serverRegistered.getName());
         numberOfRunningJobs.decrementAndGet();
     }
 
-    public static int getNumberOfRunningJob(ServerRegistered serverRegistered){
+    /**
+     * Return the number of running job currently processing by the server in parameter
+     * @param serverRegistered a server
+     * @return the number of running job.
+     */
+    public int getNumberOfRunningJob(ServerRegistered serverRegistered){
         AtomicInteger number = NUMBER_OF_JOB_BY_SERVER.get(serverRegistered.getName());
         if(number != null){
             return number.get();

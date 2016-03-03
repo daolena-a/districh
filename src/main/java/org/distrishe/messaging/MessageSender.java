@@ -39,6 +39,12 @@ public class MessageSender {
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
     }
 
+    /**
+     * Send the data to a specific queue
+     * @param data data to send
+     * @param queueName the queue name.
+     * @throws Exception
+     */
     public void sendMessage(String data, String queueName) throws Exception {
 
 

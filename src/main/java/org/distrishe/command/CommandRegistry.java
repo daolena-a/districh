@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by adaolena on 11/01/16.
+ * Command registry index commands by their name
  */
 @Service
 @Scope("singleton")

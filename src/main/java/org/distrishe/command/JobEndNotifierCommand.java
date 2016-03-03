@@ -12,12 +12,16 @@ import javax.annotation.PostConstruct;
 
 /**
  * Created by adaolena on 25/01/16.
+ * Process an end job message sent once a job is done
  */
 @Component
 public class JobEndNotifierCommand implements Command {
+
     public static Logger logger = LoggerFactory.getLogger(JobEndNotifierCommand.class);
     @Autowired
     private CommandRegistry registry;
+    @Autowired
+    private RunningJobRegister runningJobRegister;
 
 
     @Override
@@ -29,7 +33,7 @@ public class JobEndNotifierCommand implements Command {
     public Boolean process(JSONObject v) {
         String jobId = (String) v.get("jobId");
         logger.info("job " + jobId + " ends");
-        RunningJobRegister.removeJob(jobId);
+        runningJobRegister.removeJob(jobId);
         return true;
     }
 
@@ -45,6 +49,14 @@ public class JobEndNotifierCommand implements Command {
 
     public CommandRegistry getRegistry() {
         return registry;
+    }
+
+    public RunningJobRegister getRunningJobRegister() {
+        return runningJobRegister;
+    }
+
+    public void setRunningJobRegister(RunningJobRegister runningJobRegister) {
+        this.runningJobRegister = runningJobRegister;
     }
 
     public void setRegistry(CommandRegistry registry) {

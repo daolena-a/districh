@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * Created by adaolena on 11/01/16.
+ * Init the embedded broker.
  */
 @Service
 public class MessagingService {
